@@ -1,0 +1,113 @@
+// #include <AccelStepper.h>
+// #include <MultiStepper.h>
+#include "StepperMotor.h"
+#include "Cablebot.h"
+
+// Define the connection pins
+//Motor1
+#define STEPPIN1 9 // Connect to PUL+
+#define DIRPIN1 8 // Connect to DIR+
+
+// Motor 2
+#define STEPPIN2 6 // Connect to PUL+
+#define DIRPIN2 5 // Connect to DIR+
+
+// Motor 3
+#define STEPPIN3 4 // Connect to PUL+
+#define DIRPIN3 3 // Connect to DIR+
+
+#define STEPS 50
+#define RADIUS 4.0
+#define STEPS_PER_REVOLUTION 200
+
+// for your motor
+AccelStepper Stepper1(AccelStepper::DRIVER, STEPPIN1, DIRPIN1);
+AccelStepper Stepper2(AccelStepper::DRIVER, STEPPIN2, DIRPIN2);
+AccelStepper Stepper3(AccelStepper::DRIVER, STEPPIN3, DIRPIN3);
+AccelStepper* steppersArray[3] = {&Stepper1, &Stepper2, &Stepper3};
+
+MultiStepper steppers;
+
+StepperMotor motorArray[3];
+Cablebot cablebot = Cablebot();
+float circle_points[STEPS][3];
+float line_points[STEPS][3];
+
+void setup() {
+    // set the speed at 60 rpm:
+	Stepper1.setMaxSpeed(400); //Defined in steps per second
+	Stepper2.setMaxSpeed(400);
+	Stepper3.setMaxSpeed(400);
+
+	steppers.addStepper(Stepper1);
+	steppers.addStepper(Stepper2);
+	steppers.addStepper(Stepper3);
+
+	pinMode(STEPPIN1, OUTPUT);// rotate
+	pinMode(DIRPIN1, OUTPUT);// direction
+	pinMode(STEPPIN2, OUTPUT);// rotate
+	pinMode(DIRPIN2, OUTPUT);// direction
+	pinMode(STEPPIN3, OUTPUT);// rotate
+	pinMode(DIRPIN3, OUTPUT);// direction
+	pinMode(11,INPUT); // clockwise
+	pinMode(12,INPUT); // anti clockwise
+
+	float motor1Base[3] = {0.0, 0.0, 0.0};
+	float motor2Base[3] = {0.0, 0.0, 0.0};
+	float motor3Base[3] = {0.0, 0.0, 0.0};
+	float anchor1EE[3] = {0.0, 0.0, 0.0};
+	float anchor2EE[3] = {0.0, 0.0, 0.0};
+	float anchor3EE[3] = {0.0, 0.0, 0.0};
+	float EEInitBase[3] = {0.0, 0.0, 0.0};
+
+	motorArray[0] = StepperMotor(motor1Base, anchor1EE, EEInitBase, RADIUS, STEPS_PER_REVOLUTION);
+	motorArray[1] = StepperMotor(motor2Base, anchor2EE, EEInitBase, RADIUS, STEPS_PER_REVOLUTION);
+	motorArray[2] = StepperMotor(motor3Base, anchor3EE, EEInitBase, RADIUS, STEPS_PER_REVOLUTION);
+
+	cablebot = Cablebot(motorArray, 3, EEInitBase);
+
+	float circle_center[3] = {0.0, 0.0, 0.0};
+	cablebot.flatCircleTrajectory(circle_points, circle_center, RADIUS, STEPS);
+	cablebot.lineTrajectory(line_points, circle_center, STEPS);
+	
+} 
+
+void loop() {
+	// Perform linear trajectory to starting point of circle
+	for(int i = 0; i < STEPS; i++){
+		int16_t motorSteps[3];
+		for(int j = 0; j < 3; j++){
+			motorSteps[j] = steppersArray[j]->currentPosition() + 
+							motorArray[j].calculateMotorSteps(line_points[i]);
+		}
+		steppers.moveTo(motorSteps);
+		steppers.runToPosition();
+	}
+
+	// Perform circular trajectory
+	for(int i = 0; i < STEPS; i++){
+		int16_t motorSteps[3];
+		for(int j = 0; j < 3; j++){
+			motorSteps[j] = steppersArray[j]->currentPosition() + 
+							motorArray[j].calculateMotorSteps(circle_points[i]);
+		}
+		steppers.moveTo(motorSteps);
+		steppers.runToPosition();
+	}
+
+	if (Serial.available() >= 6) {
+		int16_t step1, step2, step3;
+		Serial.readBytes((char*)&step1,2);
+		Serial.readBytes((char*)&step2,2);
+		Serial.readBytes((char*)&step3,2);
+
+		long positions[3]; //Array of motor positions
+		positions[0] = Stepper1.currentPosition() + step1;
+		positions[1] = Stepper2.currentPosition() + step2;
+		positions[2] = Stepper3.currentPosition() + step3;
+
+		steppers.moveTo(positions);
+		steppers.runToPosition();
+		Serial.println("nextset");
+	} 
+}
