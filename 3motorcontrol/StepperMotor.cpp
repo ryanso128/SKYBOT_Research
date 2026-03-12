@@ -3,7 +3,7 @@
 StepperMotor::StepperMotor(const float* motorBase, 
                  const float* anchorEE,
                  const float* EEInitBase, 
-                 float pulleyRadius,
+                 float winchRadius,
                  float stepsPerRevolution){
         for(int i = 0; i < 3; i++){
             this -> motorBase[i] = motorBase[i];
@@ -16,7 +16,7 @@ StepperMotor::StepperMotor(const float* motorBase,
             this -> anchorBase[i] = anchorEE[i] + EEInitBase[i];
         }
 
-        this -> pulleyCircle = 2 * M_PI * pulleyRadius;
+        this -> winchCircle = 2 * M_PI * winchRadius;
         this -> stepsPerRevolution = stepsPerRevolution;
         this -> stringLength = calculateStringLength(EEInitBase);
 }
@@ -25,7 +25,7 @@ int StepperMotor::calculateMotorSteps(const float* EEPosition){
         double destinationLength = calculateStringLength(EEPosition);
         stringLength = destinationLength;
         double lengthChange = destinationLength - stringLength;
-        return int(lengthChange * stepsPerRevolution / pulleyCircle);
+        return int(lengthChange * stepsPerRevolution / winchCircle);
 }
 
 double StepperMotor::calculateStringLength(const float* EEPosition){
