@@ -121,4 +121,4 @@ for path_point in full_path:
         arduino.close()
         exit()
 
-arduino.close()
+arduino.close() 

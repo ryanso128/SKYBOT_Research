@@ -1,5 +1,5 @@
-#include <AccelStepper.h>
-#include <MultiStepper.h>
+// #include <AccelStepper.h>
+// #include <MultiStepper.h>
 #include "StepperMotor.h"
 #include "Cablebot.h"
 
@@ -19,6 +19,7 @@
 #define STEPS 50
 #define WINCH_RADIUS 4.0
 #define STEPS_PER_REVOLUTION 200
+#define CIRCLE_RADIUS 20.0
 
 // for your motor
 AccelStepper Stepper1(AccelStepper::DRIVER, STEPPIN1, DIRPIN1);
@@ -30,8 +31,6 @@ MultiStepper steppers;
 
 StepperMotor motorArray[3];
 Cablebot cablebot = Cablebot();
-float circle_points[STEPS][3];
-float line_points[STEPS][3];
 
 void setup() {
     // set the speed at 60 rpm:
@@ -64,12 +63,8 @@ void setup() {
 	motorArray[1] = StepperMotor(motor2Base, anchor2EE, EEInitBase, WINCH_RADIUS, STEPS_PER_REVOLUTION);
 	motorArray[2] = StepperMotor(motor3Base, anchor3EE, EEInitBase, WINCH_RADIUS, STEPS_PER_REVOLUTION);
 
-	cablebot = Cablebot(motorArray, 3, EEInitBase);
-
 	float circle_center[3] = {39.56, 50.75, 0.0};
-	cablebot.flatCircleTrajectory(circle_points, circle_center, RADIUS, STEPS);
-	cablebot.lineTrajectory(line_points, circle_center, STEPS);
-	
+	cablebot = Cablebot(EEInitBase, circle_center, STEPS, CIRCLE_RADIUS);
 } 
 
 void loop() {
@@ -78,7 +73,7 @@ void loop() {
 		long motorSteps[3];
 		for(int j = 0; j < 3; j++){
 			motorSteps[j] = steppersArray[j]->currentPosition() + 
-							motorArray[j].calculateMotorSteps(line_points[i]);
+							motorArray[j].calculateMotorSteps(cablebot.getEEPosition());
 		}
 		steppers.moveTo(motorSteps);
 		steppers.runSpeedToPosition();
@@ -88,8 +83,9 @@ void loop() {
 	for(int i = 0; i < STEPS; i++){
 		long motorSteps[3];
 		for(int j = 0; j < 3; j++){
+			cablebot.stepFlatCircleTrajectory();
 			motorSteps[j] = steppersArray[j]->currentPosition() + 
-							motorArray[j].calculateMotorSteps(circle_points[i]);
+							motorArray[j].calculateMotorSteps(cablebot.getEEPosition());
 		}
 		steppers.moveTo(motorSteps);
 		steppers.runSpeedToPosition();
