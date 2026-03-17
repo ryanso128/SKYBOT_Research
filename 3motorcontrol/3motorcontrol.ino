@@ -1,5 +1,5 @@
-// #include <AccelStepper.h>
-// #include <MultiStepper.h>
+#include <AccelStepper.h>
+#include <MultiStepper.h>
 #include "StepperMotor.h"
 #include "Cablebot.h"
 
@@ -90,20 +90,4 @@ void loop() {
 		steppers.moveTo(motorSteps);
 		steppers.runSpeedToPosition();
 	}
-
-	// if (Serial.available() >= 6) {
-	// 	int16_t step1, step2, step3;
-	// 	Serial.readBytes((char*)&step1,2);
-	// 	Serial.readBytes((char*)&step2,2);
-	// 	Serial.readBytes((char*)&step3,2);
-
-	// 	long positions[3]; //Array of motor positions
-	// 	positions[0] = Stepper1.currentPosition() + step1;
-	// 	positions[1] = Stepper2.currentPosition() + step2;
-	// 	positions[2] = Stepper3.currentPosition() + step3;
-
-	// 	steppers.moveTo(positions);
-	// 	steppers.runToPosition();
-	// 	Serial.println("nextset");
-	// } 
 }

@@ -18,19 +18,11 @@ class StepperMotor{
     public:
     // Constructor
     StepperMotor(){};
-    StepperMotor(const float* motorBase, 
-				 const float* anchorEE,
-				 const float* EEInitBase, 
+    StepperMotor(const float motorBase[3], 
+				 const float anchorEE[3],
+				 const float EEInitBase[3], 
 				 float winchRadius,
 				 float stepsPerRevolution);
-    
-    // Accessors
-    const float* getMotorBase(){return motorBase;}
-    const float* getAnchorEE(){return anchorEE;}
-    const float* getAnchorBase(){return anchorBase;}
-    float getPulleyCircle(){return winchCircle;}
-    float getStepsPerRevolution(){return stepsPerRevolution;}
-    float getStringLength(){return stringLength;}
 
     /*
 	Parameters:
@@ -43,7 +35,6 @@ class StepperMotor{
     private:
     float motorBase[3];
 	float anchorEE[3];
-	float anchorBase[3];
 	float winchCircle;
 	float stepsPerRevolution;
 	float stringLength;
