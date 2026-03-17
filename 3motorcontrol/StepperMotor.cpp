@@ -17,14 +17,14 @@ StepperMotor::StepperMotor(const float* motorBase,
         this -> stringLength = calculateStringLength(EEInitBase);
 }
 
-int StepperMotor::calculateMotorSteps(const float* EEPosition){
+int StepperMotor::calculateMotorSteps(const float EEPosition[3]){
         double destinationLength = calculateStringLength(EEPosition);
         double lengthChange = destinationLength - stringLength;
         stringLength = destinationLength;
         return int(lengthChange * stepsPerRevolution / winchCircle);
 }
 
-double StepperMotor::calculateStringLength(const float* EEPosition){
+float StepperMotor::calculateStringLength(const float EEPosition[3]){
         float anchorBaseToEE[3];
         for(int i = 0; i < 3; i++){
             anchorBaseToEE[i] = EEPosition[i] + anchorEE[i] - motorBase[i];

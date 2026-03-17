@@ -69,21 +69,20 @@ void setup() {
 
 void loop() {
 	// Perform linear trajectory to starting point of circle
-	for(int i = 0; i < STEPS; i++){
-		long motorSteps[3];
-		for(int j = 0; j < 3; j++){
-			motorSteps[j] = steppersArray[j]->currentPosition() + 
-							motorArray[j].calculateMotorSteps(cablebot.getEEPosition());
-		}
-		steppers.moveTo(motorSteps);
-		steppers.runSpeedToPosition();
+	float startingPoint[3] = {0.0, 0.0, 0.0};
+	long motorSteps[3];
+	cablebot.lineTrajectory(startingPoint);
+	for(int i = 0; i < 3; i++){
+		motorSteps[i] = steppersArray[i]->currentPosition() + 
+						motorArray[i].calculateMotorSteps(cablebot.getEEPosition());
 	}
+	steppers.moveTo(motorSteps);
+	steppers.runSpeedToPosition();
 
 	// Perform circular trajectory
 	for(int i = 0; i < STEPS; i++){
-		long motorSteps[3];
+		cablebot.stepFlatCircleTrajectory();
 		for(int j = 0; j < 3; j++){
-			cablebot.stepFlatCircleTrajectory();
 			motorSteps[j] = steppersArray[j]->currentPosition() + 
 							motorArray[j].calculateMotorSteps(cablebot.getEEPosition());
 		}

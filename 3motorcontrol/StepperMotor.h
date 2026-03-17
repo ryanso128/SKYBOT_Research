@@ -45,7 +45,7 @@ class StepperMotor{
 
 	Returns: The length of the string from the motor base to the end effector
 	*/
-	double calculateStringLength(const float* EEPosition);
+	float calculateStringLength(const float EEPosition[3]);
 };
 
 #endif
