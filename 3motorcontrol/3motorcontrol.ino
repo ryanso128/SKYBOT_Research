@@ -16,9 +16,11 @@
 #define STEPPIN3 4 // Connect to PUL+
 #define DIRPIN3 3 // Connect to DIR+
 
+#define INTERRUPT_PIN 2 // Button connected to pin 2
+
 #define STEPS 50
-#define WINCH_RADIUS 4.0
-#define STEPS_PER_REVOLUTION 200
+#define WINCH_RADIUS 0.375
+#define STEPS_PER_REVOLUTION 0
 #define CIRCLE_RADIUS 20.0
 
 // for your motor
@@ -32,6 +34,8 @@ MultiStepper steppers;
 StepperMotor motorArray[3];
 Cablebot cablebot = Cablebot();
 
+volatile bool eStop = 0;
+
 void setup() {
     // set the speed at 60 rpm:
 	Stepper1.setMaxSpeed(400); //Defined in steps per second
@@ -42,6 +46,10 @@ void setup() {
 	steppers.addStepper(Stepper2);
 	steppers.addStepper(Stepper3);
 
+	// Interrupt initialization
+	attachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN), e_stop, CHANGE);
+
+	// Motor initialization for driving
 	pinMode(STEPPIN1, OUTPUT);// rotate
 	pinMode(DIRPIN1, OUTPUT);// direction
 	pinMode(STEPPIN2, OUTPUT);// rotate
@@ -51,13 +59,16 @@ void setup() {
 	pinMode(11,INPUT); // clockwise
 	pinMode(12,INPUT); // anti clockwise
 
+	// Initial placements for quadpods and end effectors
 	float motor1Base[3] = {0.0, 0.0, 0.0};
 	float motor2Base[3] = {87.88, 48.0, 0.0};
 	float motor3Base[3] = {17.31, 89.5, 0.0};
 	float anchor1EE[3] = {0.0, 0.0, 0.0};
 	float anchor2EE[3] = {0.0, 0.0, 0.0};
 	float anchor3EE[3] = {0.0, 0.0, 0.0};
-	float EEInitBase[3] = {0.0, 0.0, 0.0};
+	// Max height is 74
+	// Give some slack so ideal height ~50
+	float EEInitBase[3] = {39.56, 50.75, -23.0};
 
 	motorArray[0] = StepperMotor(motor1Base, anchor1EE, EEInitBase, WINCH_RADIUS, STEPS_PER_REVOLUTION);
 	motorArray[1] = StepperMotor(motor2Base, anchor2EE, EEInitBase, WINCH_RADIUS, STEPS_PER_REVOLUTION);
@@ -69,24 +80,32 @@ void setup() {
 
 void loop() {
 	// Perform linear trajectory to starting point of circle
-	float startingPoint[3] = {0.0, 0.0, 0.0};
+	float startingPoint[3] = {49.56, 50.75, 0.0};
 	long motorSteps[3];
 	cablebot.lineTrajectory(startingPoint);
-	for(int i = 0; i < 3; i++){
+	for(int i = 0; i < 3 && !eStop; i++){
 		motorSteps[i] = steppersArray[i]->currentPosition() + 
 						motorArray[i].calculateMotorSteps(cablebot.getEEPosition());
 	}
 	steppers.moveTo(motorSteps);
-	steppers.runSpeedToPosition();
+	while (steppers.run() && !eStop);
 
 	// Perform circular trajectory
-	for(int i = 0; i < STEPS; i++){
+	for(int i = 0; i < STEPS && !eStop; i++){
 		cablebot.stepFlatCircleTrajectory();
-		for(int j = 0; j < 3; j++){
+		for(int j = 0; j < 3 && !eStop; j++){
 			motorSteps[j] = steppersArray[j]->currentPosition() + 
 							motorArray[j].calculateMotorSteps(cablebot.getEEPosition());
 		}
 		steppers.moveTo(motorSteps);
-		steppers.runSpeedToPosition();
+		while (steppers.run() && !eStop);
+	}
+	while(eStop);
+}
+
+void e_stop(){
+	eStop = 1;
+	for(int i = 0; i < 3; i++){
+		steppersArray[i] -> stop();
 	}
 }
