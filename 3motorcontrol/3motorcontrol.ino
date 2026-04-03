@@ -20,6 +20,7 @@
 
 #define STEPS 50
 #define WINCH_RADIUS 0.375
+// default is 200 steps per revolution.
 #define STEPS_PER_REVOLUTION 0
 #define CIRCLE_RADIUS 20.0
 
@@ -36,8 +37,10 @@ Cablebot cablebot = Cablebot();
 
 long motorSteps[3];
 
-float pointA[3] = {28.0, 28.0, -40.0};
-float pointB[3] = {44.0, 42.0, -39.0};
+// 1. -40
+// 2. -39
+float pointA[3] = {28.0, 28.0, -50.0};
+float pointB[3] = {44.0, 42.0, -50.0};
 
 volatile bool eStop = 0;
 
@@ -74,9 +77,9 @@ void setup() {
 	float anchor1EE[3] = {0.0, 0.0, 0.0};
 	float anchor2EE[3] = {0.0, 0.0, 0.0};
 	float anchor3EE[3] = {0.0, 0.0, 0.0};
-	// Max height is 74
+	// Max height is 71.5
 	// Give some slack so ideal height ~50
-	float EEInitBase[3] = {39.56, 50.75, -23.0};
+	float EEInitBase[3] = {39.56, 50.75, -71.5};
 
 	motorArray[0] = StepperMotor(motor1Base, anchor1EE, EEInitBase, WINCH_RADIUS, STEPS_PER_REVOLUTION);
 	motorArray[1] = StepperMotor(motor2Base, anchor2EE, EEInitBase, WINCH_RADIUS, STEPS_PER_REVOLUTION);

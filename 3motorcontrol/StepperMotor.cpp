@@ -1,8 +1,8 @@
 #include "StepperMotor.h"
 
-StepperMotor::StepperMotor(const float* motorBase, 
-                           const float* anchorEE,
-                           const float* EEInitBase, 
+StepperMotor::StepperMotor(const float motorBase[3], 
+                           const float anchorEE[3],
+                           const float EEInitBase[3], 
                            float winchRadius,
                            float stepsPerRevolution){
         for(int i = 0; i < 3; i++){
@@ -29,7 +29,7 @@ float StepperMotor::calculateStringLength(const float EEPosition[3]){
         for(int i = 0; i < 3; i++){
             anchorBaseToEE[i] = EEPosition[i] + anchorEE[i] - motorBase[i];
         }
-        double length = 0;
+        float length = 0;
         for(int i = 0; i < 3; i++){
             length += anchorBaseToEE[i] * anchorBaseToEE[i];
         }

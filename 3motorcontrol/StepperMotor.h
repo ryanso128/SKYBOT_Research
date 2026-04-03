@@ -30,7 +30,7 @@ class StepperMotor{
 
 	Returns: The number of steps the motor needs to move to reach the desired end effector position
 	*/
-	int calculateMotorSteps(const float* EEPosition);
+	int calculateMotorSteps(const float EEPosition[3]);
 
     private:
     float motorBase[3];
