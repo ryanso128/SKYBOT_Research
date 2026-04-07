@@ -21,11 +21,11 @@ Please make the motors are placed in the right location based on the motor base/
 
 #define INTERRUPT_PIN 2 // Button connected to pin 2
 
-#define STEPS 50
+#define STEPS 500
 #define WINCH_RADIUS 0.375
 // default is 200 steps per revolution.
 #define STEPS_PER_REVOLUTION 200
-#define CIRCLE_RADIUS 20.0
+#define CIRCLE_RADIUS 10.0
 
 // for your motor
 AccelStepper Stepper1(AccelStepper::DRIVER, STEPPIN1, DIRPIN1);
@@ -51,6 +51,7 @@ void moveToPoint();
 void e_stop_ISR();
 
 void setup() {
+	Serial.begin(9600);
     // set the speed at 60 rpm:
 	Stepper1.setMaxSpeed(400); //Defined in steps per second
 	Stepper2.setMaxSpeed(400);
@@ -87,25 +88,30 @@ void setup() {
 	motorArray[1] = StepperMotor(motor2Base, anchor2EE, EEInitBase, WINCH_RADIUS, STEPS_PER_REVOLUTION);
 	motorArray[2] = StepperMotor(motor3Base, anchor3EE, EEInitBase, WINCH_RADIUS, STEPS_PER_REVOLUTION);
 
-	float circle_center[3] = {39.56, 50.75, 0.0};
+	float circle_center[3] = {39.56, 50.75, -61.5};
 	cablebot = Cablebot(EEInitBase, circle_center, STEPS, CIRCLE_RADIUS);
+
+	float point[3] = {29.56, 50.75, -61.5};
+	cablebot.lineTrajectory(point);
+	moveToPoint();
 } 
 
 void loop() {
 	// Perform linear trajectory from point a to point b
-	float point[3] = {34.56, 50.75, -71.5};
-	cablebot.lineTrajectory(point);
-	moveToPoint();
-	while(1);
 	// cablebot.lineTrajectory(pointB);
-	while(eStop);
+	// moveToPoint();
+	// cablebot.lineTrajectory(pointB);
+	// moveToPoint();
+	// while(1);
+	// cablebot.lineTrajectory(pointB);
+	// while(eStop);
 
 	// Perform circular trajectory around center point
-	// for(int i = 0; i < STEPS && !eStop; i++){
-	// 	cablebot.stepFlatCircleTrajectory();
-	// 	moveToPoint();
-	// }
-	// while(eStop);
+	for(int i = 0; i < STEPS && !eStop; i++){
+		cablebot.stepFlatCircleTrajectory();
+		moveToPoint();
+	}
+	while(eStop);
 }
 
 void moveToPoint(){
@@ -113,7 +119,7 @@ void moveToPoint(){
 	for(int i = 0; i < 3 && !eStop; i++){
 		motorSteps[i] = steppersArray[i]->currentPosition() + 
 						motorArray[i].calculateMotorSteps(cablebot.getEEPosition());
-		Serial.print(motorSteps[i]);
+		Serial.println(motorSteps[i]);
 	}
 	Serial.println();
 	steppers.moveTo(motorSteps);
