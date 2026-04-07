@@ -4,7 +4,10 @@
 #include "Cablebot.h"
 
 // Define the connection pins
-//Motor1
+/**********************************************************************************************
+Please make the motors are placed in the right location based on the motor base/wired correctly
+**********************************************************************************************/
+// Motor1
 #define STEPPIN1 9 // Connect to PUL+
 #define DIRPIN1 8 // Connect to DIR+
 
@@ -21,7 +24,7 @@
 #define STEPS 50
 #define WINCH_RADIUS 0.375
 // default is 200 steps per revolution.
-#define STEPS_PER_REVOLUTION 0
+#define STEPS_PER_REVOLUTION 200
 #define CIRCLE_RADIUS 20.0
 
 // for your motor
@@ -78,7 +81,6 @@ void setup() {
 	float anchor2EE[3] = {0.0, 0.0, 0.0};
 	float anchor3EE[3] = {0.0, 0.0, 0.0};
 	// Max height is 71.5
-	// Give some slack so ideal height ~50
 	float EEInitBase[3] = {39.56, 50.75, -71.5};
 
 	motorArray[0] = StepperMotor(motor1Base, anchor1EE, EEInitBase, WINCH_RADIUS, STEPS_PER_REVOLUTION);
@@ -91,10 +93,11 @@ void setup() {
 
 void loop() {
 	// Perform linear trajectory from point a to point b
-	cablebot.lineTrajectory(pointA);
+	float point[3] = {34.56, 50.75, -71.5};
+	cablebot.lineTrajectory(point);
 	moveToPoint();
-	cablebot.lineTrajectory(pointB);
-	moveToPoint();
+	while(1);
+	// cablebot.lineTrajectory(pointB);
 	while(eStop);
 
 	// Perform circular trajectory around center point
@@ -110,7 +113,9 @@ void moveToPoint(){
 	for(int i = 0; i < 3 && !eStop; i++){
 		motorSteps[i] = steppersArray[i]->currentPosition() + 
 						motorArray[i].calculateMotorSteps(cablebot.getEEPosition());
+		Serial.print(motorSteps[i]);
 	}
+	Serial.println();
 	steppers.moveTo(motorSteps);
 	while (steppers.run() && !eStop);
 }
