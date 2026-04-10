@@ -21,8 +21,7 @@ int StepperMotor::calculateMotorSteps(const float EEPosition[3]){
         float destinationLength = calculateStringLength(EEPosition);
         float lengthChange = destinationLength - stringLength;
         stringLength = destinationLength;
-        // return int(lengthChange * stepsPerRevolution / winchCircle);
-        return int(lengthChange * stepsPerRevolution);
+        return lround(lengthChange * stepsPerRevolution / winchCircle);
 }
 
 float StepperMotor::calculateStringLength(const float EEPosition[3]){

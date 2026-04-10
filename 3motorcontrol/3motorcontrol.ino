@@ -4,9 +4,10 @@
 #include "Cablebot.h"
 
 // Define the connection pins
-/**********************************************************************************************
+/****************************************************************************************************
 Please make the motors are placed in the right location based on the motor base/wired correctly
-**********************************************************************************************/
+Additonally, make sure the string is strung correctly and wrapped around the winch counter-clockwise.
+*****************************************************************************************************/
 // Motor1
 #define STEPPIN1 9 // Connect to PUL+
 #define DIRPIN1 8 // Connect to DIR+

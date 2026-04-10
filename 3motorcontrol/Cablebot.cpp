@@ -31,9 +31,12 @@ void Cablebot::stepFlatCircleTrajectory(){
     currEEPosition[0] = center[0] + dx;
     currEEPosition[1] = center[1] + dy;
     currEEPosition[2] = center[2];
+    
+    float temp_dx = dx;
+    float temp_dy = dy;
 
-    dx = dx * cos_dtheta - dy * sin_dtheta;
-    dy = dx * sin_dtheta + dy * cos_dtheta;
+    dx = temp_dx * cos_dtheta - temp_dy * sin_dtheta;
+    dy = temp_dx * sin_dtheta + temp_dy * cos_dtheta;
 }
 
 void Cablebot::lineTrajectory(const float destination_EE_position[3]){
